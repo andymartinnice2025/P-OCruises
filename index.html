@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cruise Finder — P&O Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* accessibility */
+    :focus { outline: 3px solid rgba(59,130,246,0.7); outline-offset: 2px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+  <!-- Mock P&O top navigation -->
+  <nav class="bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
+      <!-- Left: Logo -->
+      <div class="flex items-center gap-3">
+        <img
+          src="https://cdn.freebiesupply.com/logos/large/2x/p-o-cruises-2-logo-png-transparent.png"
+          alt="P&O Cruises Logo"
+          class="h-8 w-auto"
+        />
+      </div>
+
+      <!-- Middle: Menu -->
+      <ul class="hidden md:flex items-center gap-6 text-[15px] text-blue-900 font-medium">
+        <li><a href="#" class="hover:text-blue-600">My Cruises ▾</a></li>
+        <li><a href="#" class="hover:text-blue-600">Deals ▾</a></li>
+        <li><a href="#" class="hover:text-blue-600">Destinations ▾</a></li>
+        <li><a href="#" class="hover:text-blue-600">On board ▾</a></li>
+        <li><a href="#" class="hover:text-blue-600">Discover cruising ▾</a></li>
+        <li><a href="#" class="hover:text-blue-600">Help ▾</a></li>
+      </ul>
+
+      <!-- Right: Actions -->
+      <div class="flex items-center gap-3">
+        <button class="text-slate-700 hover:text-blue-700" aria-label="Search">
+          <!-- neutral magnifier (no blue fill) -->
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+               stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M21 21l-4.35-4.35m1.85-5.4a7.25 7.25 0 11-14.5 0 7.25 7.25 0 0114.5 0z" />
+          </svg>
+        </button>
+        <button class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-blue-700">
+          Find a cruise
+        </button>
+
+        <!-- Sign in button we will swap via app.js -->
+        <button id="btnSignIn"
+                class="border border-blue-400 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-50 flex items-center gap-1">
+          <span id="btnSignInLabel">Sign in</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+               stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 19.5a8.25 8.25 0 1115 0" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page header -->
+  <header class="bg-white shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <h1 class="text-lg font-semibold tracking-tight text-slate-800">
+        Cruise Finder Demo
+      </h1>
+      <span class="text-sm text-slate-500">Voice-ready mock</span>
+    </div>
+  </header>
+
+  <!-- Filters + Results -->
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <section class="mb-6">
+      <div class="grid gap-4 md:grid-cols-5 bg-white p-4 rounded-2xl shadow">
+        <div class="md:col-span-2">
+          <label for="destination" class="block text-sm font-medium mb-1">Destination</label>
+          <select id="destination" name="destination" aria-label="Destination" class="w-full rounded-xl border-slate-300">
+            <option value="">Any</option>
+          </select>
+        </div>
+        <div>
+          <label for="month" class="block text-sm font-medium mb-1">Month</label>
+          <select id="month" name="month" aria-label="Month of travel" class="w-full rounded-xl border-slate-300">
+            <option value="">Any</option>
+          </select>
+        </div>
+        <div>
+          <label for="duration" class="block text-sm font-medium mb-1">Duration</label>
+          <select id="duration" name="duration" aria-label="Duration" class="w-full rounded-xl border-slate-300">
+            <option value="">Any</option>
+            <option value="2-5">2–5 nights</option>
+            <option value="6-9">6–9 nights</option>
+            <option value="10-14">10–14 nights</option>
+            <option value="15+">15+ nights</option>
+          </select>
+        </div>
+        <div>
+          <label for="ship" class="block text-sm font-medium mb-1">Ship</label>
+          <select id="ship" name="ship" aria-label="Ship" class="w-full rounded-xl border-slate-300">
+            <option value="">Any</option>
+          </select>
+        </div>
+        <div class="md:col-span-5 flex gap-3">
+          <button id="searchBtn" class="px-5 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition">Search</button>
+          <button id="resetBtn" class="px-5 py-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-50">Reset</button>
+          <div role="status" aria-live="polite" id="resultCount" class="ml-auto self-center text-sm text-slate-600"></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div id="results" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+  </main>
+
+  <!-- Card template with image -->
+  <template id="cardTemplate">
+    <article class="bg-white rounded-2xl shadow flex flex-col h-full overflow-hidden">
+      <img data-img class="w-full h-40 object-cover" alt="Cruise destination image" />
+      <div class="p-4 flex flex-col flex-grow">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-lg"></h3>
+          <span class="text-xs px-2 py-1 rounded-full bg-slate-100"></span>
+        </div>
+        <ul class="text-sm text-slate-600 space-y-1 mb-3">
+          <li><strong>Destination:</strong> <span data-dest></span></li>
+          <li><strong>Depart:</strong> <span data-depart></span> from <span data-from></span></li>
+          <li><strong>Nights:</strong> <span data-nights></span></li>
+        </ul>
+        <!-- Set href in JS -->
+        <a data-link class="mt-auto inline-flex items-center justify-center px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">View details</a>
+      </div>
+    </article>
+  </template>
+
+  <!-- ===== Page logic (dataset + rendering + RUN_SEARCH bridge) ===== -->
+  <script>
+    // --- Mock data with images ---
+    const CRUISES = [
+      { id: 'ARC-2025-06-12', ship: 'Arcadia', nights: 7, dest: 'Mediterranean', depart: '2025-06-12', from: 'Southampton', image: 'https://www.pocruises.com/dam/inventory-assets/ports/LIS/LIS.jpg?im=FeatureCrop,width=1760,height=968?auto=format&fit=crop&w=800&q=80' },
+      { id: 'ION-2025-09-03', ship: 'Iona', nights: 14, dest: 'Norwegian Fjords', depart: '2025-09-03', from: 'Southampton', image: 'https://www.pocruises.com/content/dam/po/inventory-assets/ports/eyj/Eyjafjordur-cruise-by.jpg.image.640.490.high.jpg?auto=format&fit=crop&w=800&q=80' },
+      { id: 'BRI-2025-11-20', ship: 'Britannia', nights: 10, dest: 'Caribbean', depart: '2025-11-20', from: 'Barbados', image: 'https://www.pocruises.com/dam/inventory-assets/ports/SXM/SXM.jpg' },
+      { id: 'VEN-2025-04-08', ship: 'Ventura', nights: 5, dest: 'Canary Islands', depart: '2025-04-08', from: 'Southampton', image: 'https://www.pocruises.com/dam/inventory-assets/ports/FUE/FUE.jpg?im=FeatureCrop,width=1760,height=968?auto=format&fit=crop&w=800&q=80' },
+      { id: 'ARI-2026-02-15', ship: 'Arvia', nights: 7, dest: 'Caribbean', depart: '2026-02-15', from: 'Barbados', image: 'https://www.pocruises.com/dam/inventory-assets/ports/ANU/ANU.jpg?im=FeatureCrop,width=1760,height=968?auto=format&fit=crop&w=800&q=80' },
+      { id: 'AUR-2025-07-01', ship: 'Aurora', nights: 12, dest: 'Mediterranean', depart: '2025-07-01', from: 'Southampton', image: 'https://www.pocruises.com/dam/inventory-assets/ports/NAP/GettyImages-1220357003.png?im=FeatureCrop,width=1760,height=968?auto=format&fit=crop&w=800&q=80' },
+    ];
+
+    const destinations = [...new Set(CRUISES.map(c => c.dest))].sort();
+    const ships        = [...new Set(CRUISES.map(c => c.ship))].sort();
+
+    // Generate months for dropdown
+    function monthKey(d){ return d.toISOString().slice(0,7); }
+    const months = (() => {
+      const out = [];
+      const now = new Date();
+      now.setDate(1);
+      for (let i=0;i<18;i++){
+        const d = new Date(now);
+        d.setMonth(now.getMonth()+i);
+        const key = monthKey(d);
+        const label = d.toLocaleString('en-GB', { month:'long', year:'numeric' });
+        out.push({ key, label });
+      }
+      return out;
+    })();
+
+    const $ = sel => document.querySelector(sel);
+
+    function populateSelect(sel, values){
+      const s = $(sel);
+      values.forEach(v => {
+        const o = document.createElement('option');
+        if (typeof v === 'string') { o.value = v; o.textContent = v; }
+        else { o.value = v.key; o.textContent = v.label; }
+        s.appendChild(o);
+      });
+    }
+
+    populateSelect('#destination', destinations);
+    populateSelect('#ship', ships);
+    populateSelect('#month', months);
+
+    function inRange(n, bucket){
+      if (!bucket) return true;
+      if (bucket === '15+') return n >= 15;
+      const [a,b] = bucket.split('-').map(Number);
+      return n>=a && n<=b;
+    }
+
+    function sameMonth(dateStr, key){
+      if (!key) return true;
+      return dateStr.slice(0,7) === key;
+    }
+
+    function search(){
+      const criteria = {
+        dest: $('#destination').value,
+        month: $('#month').value,
+        dur: $('#duration').value,
+        ship: $('#ship').value
+      };
+      const out = CRUISES.filter(c =>
+        (!criteria.dest || c.dest === criteria.dest) &&
+        (!criteria.ship || c.ship === criteria.ship) &&
+        inRange(c.nights, criteria.dur) &&
+        sameMonth(c.depart, criteria.month)
+      );
+      render(out);
+    }
+
+    function resetForm(){
+      ['#destination','#month','#duration','#ship'].forEach(s => $(s).value = '');
+      render(CRUISES);
+    }
+
+    function render(list){
+      const wrap = $('#results');
+      wrap.innerHTML = '';
+      $('#resultCount').textContent = `${list.length} result${list.length===1?'':'s'}`;
+      const tpl = $('#cardTemplate');
+      list.forEach(item => {
+        const node = tpl.content.cloneNode(true);
+        node.querySelector('h3').textContent = item.ship;
+        node.querySelector('span').textContent = `${item.nights} nights`;
+        node.querySelector('[data-dest]').textContent = item.dest;
+        node.querySelector('[data-depart]').textContent = new Date(item.depart).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+        node.querySelector('[data-from]').textContent = item.from;
+        node.querySelector('[data-img]').src = item.image;
+        node.querySelector('[data-link]').href = `details.html?id=${encodeURIComponent(item.id)}`;
+        wrap.appendChild(node);
+      });
+    }
+
+    $('#searchBtn').addEventListener('click', search);
+    $('#resetBtn').addEventListener('click', resetForm);
+
+    // initial render
+    render(CRUISES);
+
+    // --- Cognigy / external bridge: run search from bot ---
+    window.addEventListener('message', e => {
+      const data = e.data || {};
+      if (data.type !== 'RUN_SEARCH') return;
+      if (data.destination !== undefined) $('#destination').value = data.destination || '';
+      if (data.month !== undefined) $('#month').value = data.month || '';
+      if (data.duration !== undefined) $('#duration').value = data.duration || '';
+      if (data.ship !== undefined) $('#ship').value = data.ship || '';
+      search();
+    });
+  </script>
+
+  <!-- ===== Cognigy Webchat loader + bridge (to dispatch _webapp.type) ===== -->
+  <script>
+  (function () {
+    var CONFIG_URL = "https://endpoint-trial.cognigy.ai/dddb5ff2729a9e6000017a4bc41ea7952bd51e4f230aeb0f5884918c2cefc3ee";
+
+    var SOURCES = [
+      "https://github.com/Cognigy/Webchat/releases/latest/download/webchat.js",
+      "https://cdn.jsdelivr.net/npm/@cognigy/webchat-widget@3.52.0/build/webchat.js",
+      "https://unpkg.com/@cognigy/webchat-widget@3.52.0/build/webchat.js"
+    ];
+
+    function extractWebapp(out){
+      if (out && out.data && out.data.data && out.data.data._webapp) return out.data.data._webapp;
+      if (out && out.data && out.data._webapp) return out.data._webapp;
+      if (out && out._webapp) return out._webapp;
+      return null;
+    }
+
+    function attachBridge(webchat){
+      webchat.on("output", function (out) {
+        var wa = extractWebapp(out);
+        if (!wa || !wa.type) return;
+        window.dispatchEvent(new CustomEvent(wa.type, { detail: wa.payload || {} }));
+        if (wa.type === "webapp.signin" && typeof window.webappSignin === "function") {
+          window.webappSignin(wa.payload || {});
+        }
+      });
+
+      webchat.on("message", function (_direction, msg) {
+        var wa = extractWebapp(msg);
+        if (!wa || !wa.type) return;
+        window.dispatchEvent(new CustomEvent(wa.type, { detail: wa.payload || {} }));
+        if (wa.type === "webapp.signin" && typeof window.webappSignin === "function") {
+          window.webappSignin(wa.payload || {});
+        }
+      });
+
+      // window._webchat = webchat; // optional for debugging: open/close etc.
+      // webchat.open(); // uncomment to auto-open for testing
+    }
+
+    function initOnce() {
+      if (typeof initWebchat !== "function") {
+        console.error("[webchat] loaded but initWebchat missing");
+        return;
+      }
+      initWebchat(CONFIG_URL, {
+        settings: { enableConnectionStatusIndicator: true, showCloseButton: true }
+      }).then(attachBridge).catch(function (e) {
+        console.error("[webchat] init failed", e);
+      });
+    }
+
+    function loadNext() {
+      if (!SOURCES.length) return console.error("[webchat] All sources failed");
+      var src = SOURCES.shift();
+      var s = document.createElement("script");
+      s.src = src; s.async = true; s.onload = initOnce; s.onerror = loadNext;
+      document.head.appendChild(s);
+    }
+
+    loadNext();
+  })();
+  </script>
+
+  <!-- Your app logic (handles the actual UI changes) -->
+  <script src="./app.js" defer></script>
+</body>
+</html>
