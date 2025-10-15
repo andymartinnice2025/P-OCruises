@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cruise Finder — P&O Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :focus { outline: 3px solid rgba(59,130,246,0.7); outline-offset: 2px; }
+    /* keep voice widget above the page */
+    [id*="webrtc"], [class*="webrtc"] { z-index: 2147483647 !important; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+  <!-- Top navigation -->
+  <nav class="bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
+      <div class="flex items-center gap-3">
+        <img src="https://cdn.freebiesupply.com/logos/large/2x/p-o-cruises-2-logo-png-transparent.png" alt="P&O Cruises Logo" class="h-8 w-auto" />
+      </div>
+      <ul class="hidden md:flex items-center gap-6 text-[15px] text-blue-900 font-medium">
+        <li><a href="#" class="hover:text-blue-600">My Cruises ▾</a></li>
+        <li><a href="#" class="hover:text-blue-600">Deals ▾</a></li>
+        <li><a href="#" class="hover:text-blue-600">Destinations ▾</a></li>
+        <li><a href="#" class="hover:text-blue-600">On board ▾</a></li>
+        <li><a href="#" class="hover:text-blue-600">Discover cruising ▾</a></li>
+        <li><a href="#" class="hover:text-blue-600">Help ▾</a></li>
+      </ul>
+      <div class="flex items-center gap-3">
+        <button class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-blue-700">
+          Find a cruise
+        </button>
+
+        <!-- Sign in button updated by webappSignin -->
+        <button id="btnSignIn" class="border border-blue-400 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-50 flex items-center gap-1 transition">
+          <span id="btnSignInLabel">Sign in</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 19.5a8.25 8.25 0 1115 0" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <header class="bg-white shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <h1 class="text-lg font-semibold tracking-tight text-slate-800">Cruise Finder Demo</h1>
+      <span class="text-sm text-slate-500">Voice-ready mock</span>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <section class="mb-6">
+      <div class="grid gap-4 md:grid-cols-5 bg-white p-4 rounded-2xl shadow">
+        <div class="md:col-span-2">
+          <label for="destination" class="block text-sm font-medium mb-1">Destination</label>
+          <select id="destination" name="destination" class="w-full rounded-xl border-slate-300">
+            <option value="">Any</option>
+          </select>
+        </div>
+        <div>
+          <label for="month" class="block text-sm font-medium mb-1">Month</label>
+          <select id="month" name="month" class="w-full rounded-xl border-slate-300">
+            <option value="">Any</option>
+          </select>
+        </div>
+        <div>
+          <label for="duration" class="block text-sm font-medium mb-1">Duration</label>
+          <select id="duration" name="duration" class="w-full rounded-xl border-slate-300">
+            <option value="">Any</option>
+            <option value="2-5">2–5 nights</option>
+            <option value="6-9">6–9 nights</option>
+            <option value="10-14">10–14 nights</option>
+            <option value="15+">15+ nights</option>
+          </select>
+        </div>
+        <div>
+          <label for="ship" class="block text-sm font-medium mb-1">Ship</label>
+          <select id="ship" name="ship" class="w-full rounded-xl border-slate-300">
+            <option value="">Any</option>
+          </select>
+        </div>
+        <div class="md:col-span-5 flex gap-3">
+          <button id="searchBtn" class="px-5 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition">Search</button>
+          <button id="resetBtn" class="px-5 py-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-50">Reset</button>
+          <div role="status" aria-live="polite" id="resultCount" class="ml-auto self-center text-sm text-slate-600"></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div id="results" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+  </main>
+
+  <template id="cardTemplate">
+    <article class="bg-white rounded-2xl shadow flex flex-col h-full overflow-hidden">
+      <img data-img class="w-full h-40 object-cover" alt="Cruise destination image" />
+      <div class="p-4 flex flex-col flex-grow">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-lg"></h3>
+          <span class="text-xs px-2 py-1 rounded-full bg-slate-100"></span>
+        </div>
+        <ul class="text-sm text-slate-600 space-y-1 mb-3">
+          <li><strong>Destination:</strong> <span data-dest></span></li>
+          <li><strong>Depart:</strong> <span data-depart></span> from <span data-from></span></li>
+          <li><strong>Nights:</strong> <span data-nights></span></li>
+        </ul>
+        <a data-link class="mt-auto inline-flex items-center justify-center px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">View details</a>
+      </div>
+    </article>
+  </template>
+
+  <!-- ===== Page logic (scoped; no globals leaked) ===== -->
+  <script>
+    (function () {
+      const CRUISES = [
+        { id: 'ARC-2025-06-12', ship: 'Arcadia', nights: 7, dest: 'Mediterranean', depart: '2025-06-12', from: 'Southampton', image: 'https://www.pocruises.com/dam/inventory-assets/ports/LIS/LIS.jpg' },
+        { id: 'ION-2025-09-03', ship: 'Iona', nights: 14, dest: 'Norwegian Fjords', depart: '2025-09-03', from: 'Southampton', image: 'https://www.pocruises.com/content/dam/po/inventory-assets/ports/eyj/Eyjafjordur-cruise-by.jpg.image.640.490.high.jpg' },
+        { id: 'BRI-2025-11-20', ship: 'Britannia', nights: 10, dest: 'Caribbean', depart: '2025-11-20', from: 'Barbados', image: 'https://www.pocruises.com/dam/inventory-assets/ports/SXM/SXM.jpg' },
+        { id: 'VEN-2025-04-08', ship: 'Ventura', nights: 5, dest: 'Canary Islands', depart: '2025-04-08', from: 'Southampton', image: 'https://www.pocruises.com/dam/inventory-assets/ports/FUE/FUE.jpg' },
+        { id: 'ARI-2026-02-15', ship: 'Arvia', nights: 7, dest: 'Caribbean', depart: '2026-02-15', from: 'Barbados', image: 'https://www.pocruises.com/dam/inventory-assets/ports/ANU/ANU.jpg' },
+        { id: 'AUR-2025-07-01', ship: 'Aurora', nights: 12, dest: 'Mediterranean', depart: '2025-07-01', from: 'Southampton', image: 'https://www.pocruises.com/dam/inventory-assets/ports/NAP/GettyImages-1220357003.png' },
+      ];
+
+      const qs = s => document.querySelector(s);
+      const destinations = [...new Set(CRUISES.map(c => c.dest))].sort();
+      const ships        = [...new Set(CRUISES.map(c => c.ship))].sort();
+      const months = (() => {
+        const out = []; const now = new Date(); now.setDate(1);
+        for (let i=0;i<18;i++){ const d=new Date(now); d.setMonth(now.getMonth()+i);
+          out.push({ key:d.toISOString().slice(0,7), label:d.toLocaleString('en-GB',{month:'long',year:'numeric'})});
+        } return out;
+      })();
+
+      function populateSelect(sel, values){
+        const s = qs(sel);
+        values.forEach(v => {
+          const o = document.createElement('option');
+          if (typeof v === 'string') { o.value = v; o.textContent = v; }
+          else { o.value = v.key; o.textContent = v.label; }
+          s.appendChild(o);
+        });
+      }
+
+      populateSelect('#destination', destinations);
+      populateSelect('#ship', ships);
+      populateSelect('#month', months);
+
+      function inRange(n, bucket){ if(!bucket) return true; if(bucket==='15+') return n>=15; const [a,b]=bucket.split('-').map(Number); return n>=a && n<=b; }
+      function sameMonth(dateStr, key){ return !key || dateStr.slice(0,7)===key; }
+
+      function render(list){
+        const wrap = qs('#results'); wrap.innerHTML='';
+        qs('#resultCount').textContent = `${list.length} result${list.length===1?'':'s'}`;
+        const tpl = qs('#cardTemplate');
+        list.forEach(item => {
+          const node = tpl.content.cloneNode(true);
+          node.querySelector('h3').textContent = item.ship;
+          node.querySelector('span').textContent = `${item.nights} nights`;
+          node.querySelector('[data-dest]').textContent = item.dest;
+          node.querySelector('[data-depart]').textContent = new Date(item.depart).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+          node.querySelector('[data-from]').textContent = item.from;
+          node.querySelector('[data-img]').src = item.image;
+          node.querySelector('[data-link]').href = `details.html?id=${encodeURIComponent(item.id)}`;
+          wrap.appendChild(node);
+        });
+      }
+
+      function search(){
+        const c = { dest:qs('#destination').value, month:qs('#month').value, dur:qs('#duration').value, ship:qs('#ship').value };
+        const out = CRUISES.filter(x => (!c.dest||x.dest===c.dest)&&(!c.ship||x.ship===c.ship)&&inRange(x.nights,c.dur)&&sameMonth(x.depart,c.month));
+        render(out);
+      }
+
+      function resetForm(){ ['#destination','#month','#duration','#ship'].forEach(s=>qs(s).value=''); render(CRUISES); }
+      qs('#searchBtn').addEventListener('click', search);
+      qs('#resetBtn').addEventListener('click', resetForm);
+      render(CRUISES);
+
+      // Optional: keep support for RUN_SEARCH CustomEvent if you later emit it
+      window.addEventListener('message', e => {
+        const data = e.data || {};
+        if (data.type !== 'RUN_SEARCH') return;
+        if (data.destination !== undefined) qs('#destination').value = data.destination || '';
+        if (data.month !== undefined) qs('#month').value = data.month || '';
+        if (data.duration !== undefined) qs('#duration').value = data.duration || '';
+        if (data.ship !== undefined) qs('#ship').value = data.ship || '';
+        search();
+      });
+    })();
+  </script>
+
+  <!-- ===== WebRTC widget (Cognigy-hosted) ===== -->
+  <script src="https://static-trial.cognigy.ai/webrtc/webrtc-widget.js"></script>
+  <script>
+    addEventListener("load", () => {
+      if (typeof window.initWebRTCWidget === "function") {
+        window.initWebRTCWidget("https://endpoint-trial.cognigy.ai/3568e88831a6afc79127acd1cabc8063a9730f0b7d0a0639740e2824ba149a9d");
+        console.log("[webrtc] Widget initialized");
+      } else {
+        console.error("[webrtc] initWebRTCWidget not found — check script src or CSP.");
+      }
+    });
+  </script>
+
+  <!-- ===== SSE bridge: listen for sign-in events via ntfy.sh ===== -->
+  <script>
+    (function(){
+      const TOPIC = "po-demo-andy-7d2c8d2c3f1a4fe7b1a0a1bd9c"; // your random topic
+
+      // UI update when signed in
+      window.webappSignin = function (payload) {
+        const { name = "Guest" } = payload || {};
+        const label = document.querySelector("#btnSignInLabel");
+        if (label) label.textContent = `Hi, ${name}`;
+        const btn = document.querySelector("#btnSignIn");
+        if (btn) btn.classList.add("bg-green-600","text-white","border-0");
+        console.log("[webapp] signed in as", name);
+      };
+
+      try {
+        const url = `https://ntfy.sh/${encodeURIComponent(TOPIC)}`;
+        const es = new EventSource(url);
+        es.onmessage = (ev) => {
+          try {
+            const msg = JSON.parse(ev.data);
+            if (msg?.type === "webapp.signin") {
+              window.webappSignin(msg.payload || {});
+            } else if (msg?.type === "RUN_SEARCH") {
+              // optional future use
+              window.postMessage({ type: "RUN_SEARCH", ...(msg.payload||{}) }, "*");
+            } else {
+              console.log("[ntfy] message (ignored)", msg);
+            }
+          } catch {
+            // ignore non-JSON messages
+          }
+        };
+        es.onerror = (e) => console.warn("[ntfy] SSE error", e);
+        console.log("[ntfy] listening on", url);
+      } catch (e) {
+        console.error("[ntfy] failed to start SSE", e);
+      }
+    })();
+  </script>
+
+</body>
+</html>
