@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Book Cruise — Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :focus { outline: 3px solid rgba(59,130,246,.7); outline-offset: 2px; }
+    .step.active { color: #1d4ed8; font-weight: 600; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+<!-- Mock P&O top navigation -->
+<nav class="bg-white border-b border-slate-200">
+  <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
+    <!-- Left: Logo -->
+    <div class="flex items-center gap-3">
+      <img src="https://cdn.freebiesupply.com/logos/large/2x/p-o-cruises-2-logo-png-transparent.png"
+           alt="P&O Cruises Logo" class="h-8 w-auto" />
+    </div>
+
+    <!-- Middle: Menu -->
+    <ul class="hidden md:flex items-center gap-6 text-[15px] text-blue-900 font-medium">
+      <li><a href="#" class="hover:text-blue-600">My Cruises ▾</a></li>
+      <li><a href="#" class="hover:text-blue-600">Deals ▾</a></li>
+      <li><a href="#" class="hover:text-blue-600">Destinations ▾</a></li>
+      <li><a href="#" class="hover:text-blue-600">On board ▾</a></li>
+      <li><a href="#" class="hover:text-blue-600">Discover cruising ▾</a></li>
+      <li><a href="#" class="hover:text-blue-600">Help ▾</a></li>
+    </ul>
+
+    <!-- Right: Actions -->
+    <div class="flex items-center gap-3">
+      <button class="text-slate-700 hover:text-blue-700" aria-label="Search">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.85-5.4a7.25 7.25 0 11-14.5 0 7.25 7.25 0 0114.5 0z" />
+        </svg>
+      </button>
+      <button class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-blue-700">
+        Find a cruise
+      </button>
+      <button class="border border-blue-400 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-50 flex items-center gap-1">
+        <span>Sign in</span>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 19.5a8.25 8.25 0 1115 0" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<header class="bg-white shadow-sm">
+  <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+    <h1 class="text-lg font-semibold tracking-tight text-slate-800">
+      Cruise Finder Demo
+    </h1>
+    <span class="text-sm text-slate-500">Voice-ready mock</span>
+  </div>
+</header>
+
+  <main class="max-w-5xl mx-auto px-4 py-6">
+    <!-- Summary card -->
+    <section class="bg-white rounded-2xl shadow p-5 mb-6">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h2 id="summaryTitle" class="text-xl font-bold">&nbsp;</h2>
+          <p class="text-slate-600"><span id="summaryRoute"></span> · <span id="summaryDates"></span> · <span id="summaryNights"></span></p>
+        </div>
+        <div class="text-right">
+          <div class="text-3xl font-bold" id="summaryPrice">£—</div>
+          <div class="text-xs text-slate-500">Mock price, per cabin</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stepper -->
+    <nav class="flex items-center gap-4 text-sm mb-4" aria-label="Progress">
+      <span class="step active">1. Guests</span>
+      <span>›</span>
+      <span class="step">2. Contact</span>
+      <span>›</span>
+      <span class="step">3. Payment</span>
+      <span>›</span>
+      <span class="step">4. Review</span>
+    </nav>
+
+    <form id="bookingForm" class="grid md:grid-cols-3 gap-6" novalidate>
+      <!-- Left: form -->
+      <div class="md:col-span-2 space-y-6">
+        <!-- Guests -->
+        <section class="bg-white rounded-2xl shadow p-5" id="stepGuests">
+          <h3 class="text-lg font-semibold mb-3">Guest details</h3>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm mb-1" for="guest1first">First name</label>
+              <input id="guest1first" name="guest1first" class="w-full rounded-xl border-slate-300" required />
+            </div>
+            <div>
+              <label class="block text-sm mb-1" for="guest1last">Last name</label>
+              <input id="guest1last" name="guest1last" class="w-full rounded-xl border-slate-300" required />
+            </div>
+            <div>
+              <label class="block text-sm mb-1" for="guest1dob">Date of birth</label>
+              <input id="guest1dob" type="date" name="guest1dob" class="w-full rounded-xl border-slate-300" required />
+            </div>
+            <div>
+              <label class="block text-sm mb-1" for="guest2first">Second guest (optional)</label>
+              <input id="guest2first" name="guest2first" placeholder="First name" class="w-full rounded-xl border-slate-300" />
+            </div>
+          </div>
+          <div class="mt-4">
+            <label class="block text-sm mb-1" for="cabin">Cabin type</label>
+            <select id="cabin" name="cabin" class="w-full rounded-xl border-slate-300">
+              <option value="inside">Inside</option>
+              <option value="ocean">Oceanview</option>
+              <option value="balcony" selected>Balcony</option>
+              <option value="suite">Suite</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Contact -->
+        <section class="bg-white rounded-2xl shadow p-5 hidden" id="stepContact">
+          <h3 class="text-lg font-semibold mb-3">Lead passenger contact</h3>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm mb-1" for="email">Email</label>
+              <input id="email" type="email" class="w-full rounded-xl border-slate-300" required />
+            </div>
+            <div>
+              <label class="block text-sm mb-1" for="phone">Phone</label>
+              <input id="phone" type="tel" class="w-full rounded-xl border-slate-300" required />
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-sm mb-1" for="address">Address</label>
+              <input id="address" class="w-full rounded-xl border-slate-300" required />
+            </div>
+          </div>
+        </section>
+
+        <!-- Payment (mock) -->
+        <section class="bg-white rounded-2xl shadow p-5 hidden" id="stepPayment">
+          <h3 class="text-lg font-semibold mb-3">Payment (demo)</h3>
+          <p class="text-sm text-slate-600 mb-3">This is a mock checkout. Do not enter real card details.</p>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm mb-1" for="cardname">Name on card</label>
+              <input id="cardname" class="w-full rounded-xl border-slate-300" required />
+            </div>
+            <div>
+              <label class="block text-sm mb-1" for="cardnum">Card number</label>
+              <input id="cardnum" inputmode="numeric" pattern="[0-9 ]{12,19}" placeholder="4242 4242 4242 4242" class="w-full rounded-xl border-slate-300" required />
+            </div>
+            <div>
+              <label class="block text-sm mb-1" for="exp">Expiry</label>
+              <input id="exp" placeholder="MM/YY" class="w-full rounded-xl border-slate-300" required />
+            </div>
+            <div>
+              <label class="block text-sm mb-1" for="cvc">CVC</label>
+              <input id="cvc" inputmode="numeric" pattern="[0-9]{3,4}" class="w-full rounded-xl border-slate-300" required />
+            </div>
+          </div>
+        </section>
+
+        <!-- Review -->
+        <section class="bg-white rounded-2xl shadow p-5 hidden" id="stepReview">
+          <h3 class="text-lg font-semibold mb-3">Review & confirm</h3>
+          <div id="reviewSummary" class="text-sm text-slate-700 space-y-2"></div>
+          <div class="mt-4 flex items-center gap-2">
+            <input id="agree" type="checkbox" class="rounded" required />
+            <label for="agree" class="text-sm">I agree this is a demo and no real purchase will be made.</label>
+          </div>
+        </section>
+
+        <div class="flex gap-3">
+          <button type="button" id="prevBtn" class="px-4 py-2 rounded-xl border border-slate-300">Back</button>
+          <button type="button" id="nextBtn" class="px-4 py-2 rounded-xl bg-blue-600 text-white">Next</button>
+          <button type="submit" id="submitBtn" class="hidden px-4 py-2 rounded-xl bg-green-600 text-white">Confirm booking</button>
+        </div>
+      </div>
+
+      <!-- Right: price box -->
+      <aside class="space-y-4">
+        <div class="bg-white rounded-2xl shadow p-5">
+          <h4 class="font-semibold mb-2">Price breakdown</h4>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li class="flex justify-between"><span>Base fare</span> <span id="fare">£—</span></li>
+            <li class="flex justify-between"><span>Taxes & fees</span> <span id="tax">£—</span></li>
+            <li class="flex justify-between"><span>Cabin supplement</span> <span id="supp">£0</span></li>
+            <li class="border-t pt-2 mt-2 flex justify-between font-semibold"><span>Total</span> <span id="total">£—</span></li>
+          </ul>
+        </div>
+        <div class="bg-blue-50 rounded-2xl p-4 text-sm text-blue-900">Use voice: “Book this cruise”, then fill guest & contact details. This page can also be opened directly by your bot: <code>book.html?id=…</code></div>
+      </aside>
+    </form>
+
+    <!-- Success banner -->
+    <section id="success" class="hidden bg-white rounded-2xl shadow p-6 text-center">
+      <h3 class="text-xl font-semibold mb-2">All set! 🎉</h3>
+      <p class="text-slate-700">Your demo booking reference is <strong id="ref"></strong>.</p>
+      <p class="mt-2"><a href="details.html" class="text-blue-600 hover:underline">Back to details</a> or <a href="index.html" class="text-blue-600 hover:underline">search again</a>.</p>
+    </section>
+  </main>
+
+  <script>
+    // --- Mock data (keep consistent with other pages) ---
+    const CRUISES = [
+      { id: 'ARC-2025-06-12', ship: 'Arcadia', nights: 7, dest: 'Mediterranean', depart: '2025-06-12', from: 'Southampton', price: 699 },
+      { id: 'ION-2025-09-03', ship: 'Iona', nights: 14, dest: 'Norwegian Fjords', depart: '2025-09-03', from: 'Southampton', price: 1299 },
+      { id: 'BRI-2025-11-20', ship: 'Britannia', nights: 10, dest: 'Caribbean', depart: '2025-11-20', from: 'Barbados', price: 999 },
+      { id: 'VEN-2025-04-08', ship: 'Ventura', nights: 5, dest: 'Canary Islands', depart: '2025-04-08', from: 'Southampton', price: 449 },
+      { id: 'ARI-2026-02-15', ship: 'Arvia', nights: 7, dest: 'Caribbean', depart: '2026-02-15', from: 'Barbados', price: 899 },
+      { id: 'AUR-2025-07-01', ship: 'Aurora', nights: 12, dest: 'Mediterranean', depart: '2025-07-01', from: 'Southampton', price: 1099 }
+    ];
+
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    const cruise = CRUISES.find(c => c.id === id) || CRUISES[0];
+
+    // Populate summary
+    const depart = new Date(cruise.depart).toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
+    summaryTitle.textContent = `${cruise.ship} — ${cruise.dest}`;
+    summaryRoute.textContent = `${cruise.from} roundtrip`;
+    summaryDates.textContent = depart;
+    summaryNights.textContent = `${cruise.nights} nights`;
+
+    // Pricing (simple mock)
+    const taxes = Math.round(cruise.price * 0.12);
+    let cabinSupp = 0; // balcony default
+    function updatePrice(){
+      const cabin = document.getElementById('cabin').value;
+      cabinSupp = cabin === 'inside' ? -50 : cabin === 'ocean' ? 0 : cabin === 'balcony' ? 75 : 250;
+      const total = cruise.price + taxes + cabinSupp;
+      document.getElementById('summaryPrice').textContent = `£${total}`;
+      document.getElementById('fare').textContent = `£${cruise.price}`;
+      document.getElementById('tax').textContent = `£${taxes}`;
+      document.getElementById('supp').textContent = `£${cabinSupp}`;
+      document.getElementById('total').textContent = `£${total}`;
+    }
+    updatePrice();
+    document.getElementById('cabin').addEventListener('change', updatePrice);
+
+    // Steps logic
+    const steps = ['stepGuests','stepContact','stepPayment','stepReview'];
+    let idx = 0;
+    function showStep(i){
+      idx = Math.max(0, Math.min(steps.length-1, i));
+      steps.forEach((id, j) => document.getElementById(id).classList.toggle('hidden', j !== idx));
+      document.querySelectorAll('.step').forEach((el, j) => el.classList.toggle('active', j <= idx));
+      document.getElementById('prevBtn').disabled = idx === 0;
+      document.getElementById('nextBtn').classList.toggle('hidden', idx === steps.length-1);
+      document.getElementById('submitBtn').classList.toggle('hidden', idx !== steps.length-1);
+      if (idx === steps.length-1) buildReview();
+    }
+
+    function buildReview(){
+      const lines = [];
+      const get = id => document.getElementById(id).value;
+      lines.push(`<strong>Ship</strong>: ${cruise.ship}`);
+      lines.push(`<strong>Destination</strong>: ${cruise.dest}`);
+      lines.push(`<strong>Depart</strong>: ${depart} from ${cruise.from}`);
+      lines.push(`<strong>Cabin</strong>: ${document.getElementById('cabin').value}`);
+      lines.push(`<strong>Guest 1</strong>: ${get('guest1first')} ${get('guest1last')} (${get('guest1dob')})`);
+      if (get('guest2first')) lines.push(`<strong>Guest 2</strong>: ${get('guest2first')}`);
+      lines.push(`<strong>Email</strong>: ${get('email')}`);
+      lines.push(`<strong>Phone</strong>: ${get('phone')}`);
+      lines.push(`<strong>Address</strong>: ${get('address')}`);
+      document.getElementById('reviewSummary').innerHTML = lines.map(l => `<div>${l}</div>`).join('');
+    }
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      // basic validation for current step
+      const stepEl = document.getElementById(steps[idx]);
+      const required = stepEl.querySelectorAll('[required]');
+      for (const input of required){
+        if (!input.value){
+          input.focus();
+          input.reportValidity && input.reportValidity();
+          return;
+        }
+      }
+      showStep(idx+1);
+    });
+    document.getElementById('prevBtn').addEventListener('click', () => showStep(idx-1));
+
+    document.getElementById('bookingForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!document.getElementById('agree').checked){
+        document.getElementById('agree').focus();
+        return;
+      }
+      // Mock submit → generate a reference and show success
+      const ref = `PO-${Date.now().toString().slice(-6)}`;
+      document.getElementById('ref').textContent = ref;
+      document.getElementById('bookingForm').classList.add('hidden');
+      document.getElementById('success').classList.remove('hidden');
+      // Voice/webview bridge
+      window.postMessage({ type:'BOOKING_CONFIRMED', id: cruise.id, ref }, '*');
+    });
+
+    // Init first step
+    showStep(0);
+
+    // Voice bridge: allow Cognigy to jump steps / prefill
+    window.addEventListener('message', e => {
+      const data = e.data || {};
+      if (data.type === 'GOTO_STEP' && typeof data.index === 'number') showStep(data.index);
+      if (data.type === 'PREFILL'){
+        for (const [k,v] of Object.entries(data.values||{})){
+          const el = document.getElementById(k); if (el) el.value = v;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
