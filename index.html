@@ -237,5 +237,44 @@
 
   <!-- If you have app.js, keep it; if it uses $, wrap it in an IIFE too -->
   <script src="./app.js" defer></script>
+
+  <!-- ===== Sign-in bridge: subscribe to ntfy.sh topic ===== -->
+<script>
+  // 1) SET THIS to a long, random topic (only you know it)
+  const NTFY_TOPIC = "po-demo-andy-7d2c8d2c3f1a4fe7b1a0a1bd9c"; // e.g. "po-demo-andy-7d2c8d2c3f1a4fe7b1a0a1bd9c"
+
+  // 2) Page-side UI change (already in your page, keep or replace)
+  window.webappSignin = function (payload) {
+    const { name = "Guest" } = payload || {};
+    const label = document.querySelector("#btnSignInLabel");
+    if (label) label.textContent = `Hi, ${name}`;
+    const btn = document.querySelector("#btnSignIn");
+    if (btn) btn.classList.add("bg-green-600", "text-white", "border-0");
+    console.log("[webapp] signed in as", name);
+  };
+
+  // 3) Subscribe to the topic via SSE and handle messages
+  (function subscribeSignIn() {
+    const url = `https://ntfy.sh/${encodeURIComponent(NTFY_TOPIC)}`;
+    const es = new EventSource(url);
+    es.onmessage = (ev) => {
+      try {
+        // Expect JSON like: { "type":"webapp.signin", "payload": { "name":"Andy Martin" } }
+        const msg = JSON.parse(ev.data);
+        if (msg && msg.type === "webapp.signin") {
+          window.webappSignin(msg.payload || {});
+        } else {
+          console.log("[ntfy] message (ignored)", msg);
+        }
+      } catch (e) {
+        console.log("[ntfy] non-JSON message (ignored)", ev.data);
+      }
+    };
+    es.onerror = (e) => console.warn("[ntfy] SSE error", e);
+    console.log("[ntfy] subscribed to", url);
+  })();
+</script>
+
 </body>
+
 </html>
